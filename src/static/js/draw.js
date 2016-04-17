@@ -519,6 +519,7 @@ function moveItemsBy1Pixel(point) {
   var itemNames = new Array();
   for (x in paper.project.selectedItems) {
     var item = paper.project.selectedItems[x];
+    console.log(item.segments[0])
     item.position += point;
     itemNames.push(item._name);
   }
@@ -933,7 +934,7 @@ function processSettings(settings) {
 function chatToggleShow() {
   //If it's currently big, make it small, vice versa
   //If the user does not have a name, ask for one
-  
+
   if($("#chatBox").height() > 10){
     $("#chatBox").animate({height : 10},200);
     $("#chatMessages").hide();
@@ -946,9 +947,9 @@ function chatToggleShow() {
     $("#chatMessages").show();
     $("#chatInput").show();
   }
-  
+
 }
-    
+
 function sendChatMessage() {
     //get the text, emit it, clear the text
     var message = $('#chatInput').val();
@@ -962,7 +963,7 @@ function sendChatMessage() {
   $("#chatLabel").click(function() {chatToggleShow();} );
   $('form').submit(sendChatMessage);
 
-  
+
 // Periodically save drawing
 setInterval(function(){
   saveDrawing();

@@ -135,17 +135,17 @@ body {
   z-index: 101;
   display: none;
   border-radius: 6px;
-   
+
   background-image: -ms-linear-gradient(top, #F7F7F7 0%, #FFFFFF 100%);
-   
+
   background-image: -moz-linear-gradient(top, #F7F7F7 0%, #FFFFFF 100%);
-   
+
   background-image: -o-linear-gradient(top, #F7F7F7 0%, #FFFFFF 100%);
-   
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #F7F7F7), color-stop(1, #FFFFFF));
-   
+
   background-image: -webkit-linear-gradient(top, #F7F7F7 0%, #FFFFFF 100%);
-   
+
   background-image: linear-gradient(to bottom, #F7F7F7 0%, #FFFFFF 100%);
   border: 1px solid #ccc;
   border-top: 0;
@@ -333,7 +333,7 @@ input[type=checkbox] {
   background-position: 0px 37px;
 }
 
-@media screen and (max-width: 600px) { 
+@media screen and (max-width: 600px) {
     .toolbar ul li.separator {
       display: none;
     }
@@ -342,13 +342,13 @@ input[type=checkbox] {
     }
 }
 @media all and (max-width: 199px){
-  #editorcontainer { 
+  #editorcontainer {
     top: 68px;
   }
-  #editbar { 
+  #editbar {
     height: 31px;
   }
-  .toolbar ul.menu_right { 
+  .toolbar ul.menu_right {
   }
   .popup {
     width:100%;
@@ -486,16 +486,17 @@ input[type=checkbox] {
 }
 
 #chatLabel {
+    display: block;
     font-size: 13px;
     margin: 4px 2 2 4px;
-    position: absolute;
+    position:relative;
     font-family: Helvetica;
+    width:100%;
 }
 
 #chatMessages {
     position: relative;
     height: 80%;
-    top: 10%;
     background-color: #f0f0f0;
     list-style: none;
     font-size: 12px;
@@ -503,15 +504,17 @@ input[type=checkbox] {
 }
 
 #chatInputBox {
-    position: absolute;
-    padding: 3px 2px;
-    bottom: 0;
-    right: 0;
-    left: 3px;
-
+    position: relative;
+    height:20%;
+    width:100%;
+    margin-left:-3px;
+    margin-bottom:-13px;
+}
+#chatInput{
+  width:100%;
+  position:relative;
 }
 /*css for chat box ends here*/
 .whiteBG{
   background-color:#fff;
 }
-
