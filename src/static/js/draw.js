@@ -929,11 +929,13 @@ var end_external_path = function(points, artist) {
     // Remove the old data
     external_paths[artist] = false;
 
-  }
-  /*else if (points.tool == "rectangle") {
-	external_paths[artist] = new Path.Rectangle(points.start, points.end));
+  }else if (points.tool == "rectangle") {
+	var start_point = new Point(points.start[1], points.start[2]);
+	var end_point = new Point(points.end[1], points.end[2]);
+    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+	external_paths[artist] = new Path.Rectangle(start_point, end_point);
     path = external_paths[artist];
-	path.fillColor = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+	path.fillColor = color;
     path.name = points.name;
 	path.closed = true;
 	
@@ -942,7 +944,6 @@ var end_external_path = function(points, artist) {
 	// Remove the old data
 	external_paths[artist] = false;
   }
-  */
 
 };
 
