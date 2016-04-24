@@ -298,7 +298,7 @@ function onMouseDown(event) {
   }
   // Step 2: else if activeTool = rectangle create new path, add starting point and create path_to_send
   /* TODO: add else if */
-  else if (activeTool == "rectangle") {
+  else if (activeTool == "rectangle" || activeTool == "circle") {
     var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server
 	// Is used by the other Clients to draw(display) the path
@@ -442,11 +442,15 @@ function onMouseUp(event) {
     }
     item_move_delta = null;
     item_move_timer_is_active = false;
-  }else if (activeTool == "rectangle") {
+  }else if (activeTool == "rectangle" || activeTool == "circle") {
     path = new Path.Rectangle(path_to_send.start, event.point);
     path.fillColor = active_color_rgb;
     path.name = path_to_send.name;
     path.closed = true;
+	if ( activeTool == "circle") {
+	  path.smooth();	
+	}
+	
     view.draw();
 
     // add end point to path_to_send before sending to server
@@ -454,9 +458,6 @@ function onMouseUp(event) {
 	
 	// Step 4: Send the draw:end event to the server including path_to_send.end
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
-	
-	// reset path (wasn't used anyway)
-    //path_to_send.path = new Array();
   }
   
 
@@ -642,6 +643,18 @@ $('#rectangleTool').on('click', function() {
 	background: "#eee"
   }); // set the selecttool css to show it as active
   activeTool = "rectangle";
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+
+$('#circleTool').on('click', function() {
+  $('#editbar > ul > li > a').css({
+	background: ""
+  }); // remove the backgrounds from other buttons
+  $('#circleTool > a').css({
+	background: "#eee"
+  }); // set the selecttool css to show it as active
+  activeTool = "circle";
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
@@ -929,7 +942,7 @@ var end_external_path = function(points, artist) {
     // Remove the old data
     external_paths[artist] = false;
 
-  }else if (points.tool == "rectangle") {
+  }else if (points.tool == "rectangle" || points.tool == "circle") {
 	var start_point = new Point(points.start[1], points.start[2]);
 	var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
@@ -938,6 +951,9 @@ var end_external_path = function(points, artist) {
 	path.fillColor = color;
     path.name = points.name;
 	path.closed = true;
+	if ( points.tool == "circle") {
+	  path.smooth();	
+	}
 	
 	view.draw();
 	

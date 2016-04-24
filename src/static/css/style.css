@@ -241,8 +241,10 @@ body {
 .buttonicon-upload {
   background-image: url('../../static/img/upload.png');
 }
-/* RECT: added button styling */
 .buttonicon-rectangle {
+  background-image: url('../../static/img/select.png');
+}
+.buttonicon-circle {
   background-image: url('../../static/img/select.png');
 }
 .buttonicon-settings {
