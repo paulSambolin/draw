@@ -936,6 +936,7 @@ function chatToggleShow() {
   //If the user does not have a name, ask for one
 
   if($("#chatBox").height() > 10){
+    $("#chatBox").css("margin-bottom","-10px");
     $("#chatBox").animate({height : 10},200);
     $("#chatMessages").hide();
     $("#chatInput").hide();
