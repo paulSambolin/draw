@@ -242,10 +242,10 @@ body {
   background-image: url('../../static/img/upload.png');
 }
 .buttonicon-rectangle {
-  background-image: url('../../static/img/select.png');
+  background-image: url('../../static/img/rectangle.png');
 }
 .buttonicon-circle {
-  background-image: url('../../static/img/select.png');
+  background-image: url('../../static/img/circle.png');
 }
 .buttonicon-settings {
   background-position: 0px -436px
