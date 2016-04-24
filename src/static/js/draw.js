@@ -297,27 +297,19 @@ function onMouseDown(event) {
     }
   }
   // Step 2: else if activeTool = rectangle create new path, add starting point and create path_to_send
-  /* TODO: add else if 
+  /* TODO: add else if */
   else if (activeTool == "rectangle") {
-    var point = event.point;
-    path = new Path();
-    path.fillColor = active_color_rgb;
-	
-	//should we add point to path or view.draw()?
-    path.add(event.point);
-    path.name = uid + ":" + (++paper_object_count);
-    view.draw();
-
+    var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server
 	// Is used by the other Clients to draw(display) the path
     path_to_send = {
-      name: path.name,
+      name: test_name,
       rgba: active_color_json,
       start: event.point,
       path: [],
       tool: activeTool
     };
-  }*/
+  }
 }
 
 var item_move_delta;
@@ -450,7 +442,23 @@ function onMouseUp(event) {
     }
     item_move_delta = null;
     item_move_timer_is_active = false;
+  }else if (activeTool == "rectangle") {
+    path = new Path.Rectangle(path_to_send.start, event.point);
+    path.fillColor = active_color_rgb;
+    path.name = path_to_send.name;
+    path.closed = true;
+    view.draw();
+
+    // add end point to path_to_send before sending to server
+    path_to_send.end = event.point;
+	
+	// Step 4: Send the draw:end event to the server including path_to_send.end
+    socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
+	
+	// reset path (wasn't used anyway)
+    //path_to_send.path = new Array();
   }
+  
 
 }
 
@@ -922,6 +930,19 @@ var end_external_path = function(points, artist) {
     external_paths[artist] = false;
 
   }
+  /*else if (points.tool == "rectangle") {
+	external_paths[artist] = new Path.Rectangle(points.start, points.end));
+    path = external_paths[artist];
+	path.fillColor = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+    path.name = points.name;
+	path.closed = true;
+	
+	view.draw();
+	
+	// Remove the old data
+	external_paths[artist] = false;
+  }
+  */
 
 };
 
