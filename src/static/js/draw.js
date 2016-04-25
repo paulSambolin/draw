@@ -935,19 +935,21 @@ function chatToggleShow() {
   //If it's currently big, make it small, vice versa
   //If the user does not have a name, ask for one
 
-  if($("#chatBox").height() > 10){
-    $("#chatBox").animate({height : 10},200);
-    $("#chatMessages").hide();
-    $("#chatInput").hide();
+  if($("#chatBox").height() > 100){
+    $('#chatMessages').slideUp();
+    $('#chatInput').slideUp();
   } else {
-    if(chatName == ""){
+    if(chatName === "" || chatName === null){
       chatName = prompt("What is your name?", "");
     }
-    $("#chatBox").animate({height : 200},200);
-    $("#chatMessages").show();
-    $("#chatInput").show();
+    if(chatName !== null){
+      if (chatName === ""){
+        chatName = "Anon"+(Math.floor(Math.random()*1000)).toString();
+      }
+      $('#chatMessages').slideDown();
+      $('#chatInput').slideDown();
+    }
   }
-
 }
 
 function sendChatMessage() {
@@ -959,7 +961,6 @@ function sendChatMessage() {
 }
   //does chatName belong here?
   var chatName = "";
-  chatToggleShow();
   $("#chatLabel").click(function() {chatToggleShow();} );
   $('form').submit(sendChatMessage);
 
