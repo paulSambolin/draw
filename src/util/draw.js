@@ -50,6 +50,7 @@ exports.progressExternalPath = function (room, points, artist) {
 exports.endExternalPath = function (room, points, artist) {
   var project = projects[room].project;
   project.activate();
+  
   var path = projects[room].external_paths[artist];
   if (path) {
     // Close the path
@@ -59,7 +60,22 @@ exports.endExternalPath = function (room, points, artist) {
     project.view.draw();
     // Remove the old data
     projects[room].external_paths[artist] = false;
+  }else if (points.tool == "rectangle" || points.tool == "circle") {
+	var start_point = new drawing.Point(points.start[1], points.start[2]);
+	var end_point = new drawing.Point(points.end[1], points.end[2]);
+	var color = new drawing.Color(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+	projects[room].external_paths[artist] = new drawing.Path.Rectangle(start_point, end_point);
+    path = projects[room].external_paths[artist];
+	path.fillColor = color;
+	path.name = points.name;
+	path.closed = true;
+	if ( points.tool == "circle") {
+	  path.smooth();	
+	}
+	project.view.draw();
+    projects[room].external_paths[artist] = false;
   }
+  
   db.storeProject(room);
 };
 

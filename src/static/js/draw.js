@@ -3,6 +3,7 @@
 tool.minDistance = 10;
 tool.maxDistance = 45;
 
+// room = end of URL
 var room = window.location.pathname.split("/")[2];
 
 function pickColor(color) {
@@ -177,7 +178,7 @@ var update_active_color = function() {
   };
 };
 
-// Get the active color from the UI eleements
+// Get the active color from the UI elements
 var authorColor = getParameterByName('authorColor');
 var authorColors = {};
 if (authorColor != "" && authorColor.substr(0, 4) == "rgb(") {
@@ -215,11 +216,17 @@ var send_paths_timer;
 var timer_is_active = false;
 var paper_object_count = 0;
 var activeTool = "draw";
-var mouseTimer = 0; // used for getting if the mouse is being held down but not dragged IE when bringin up color picker
+var mouseTimer = 0; // used for getting if the mouse is being held down but not dragged IE when bringing up color picker
 var mouseHeld; // global timer for if mouse is held.
 
+
 function onMouseDown(event) {
-  if (event.which === 2) return; // If it's middle mouse button do nothing -- This will be reserved for panning in the future.
+  // If it's middle mouse button do nothing -- This will be reserved for panning in the future.
+  if (event.which === 2) {
+	  return;
+  }
+
+  // Hide popups if visible
   $('.popup').fadeOut();
 
   // Ignore middle or right mouse button clicks for now
@@ -230,10 +237,13 @@ function onMouseDown(event) {
   // Hide color picker if it is visible already
   var picker = $('#mycolorpicker');
   if (picker.is(':visible')) {
-    picker.toggle(); // show the color picker
+    picker.toggle();
   }
 
+  // Reset Mouse Timer
   mouseTimer = 0;
+
+  // Set Global mouse timer to interval of 100ms??
   mouseHeld = setInterval(function() { // is the mouse being held and not dragged?
     mouseTimer++;
     if (mouseTimer > 3) {
@@ -263,7 +273,8 @@ function onMouseDown(event) {
     path.name = uid + ":" + (++paper_object_count);
     view.draw();
 
-    // The data we will send every 100ms on mouse drag
+    // The data to be sent to server
+	// Is used by the other Clients to draw(display) the path
     path_to_send = {
       name: path.name,
       rgba: active_color_json,
@@ -284,6 +295,20 @@ function onMouseDown(event) {
     } else {
       paper.project.activeLayer.selected = false;
     }
+  }
+  // Step 2: else if activeTool = rectangle create new path, add starting point and create path_to_send
+  /* TODO: add else if */
+  else if (activeTool == "rectangle" || activeTool == "circle") {
+    var test_name = uid + ":" + (++paper_object_count);
+    // The data to be sent to server
+	// Is used by the other Clients to draw(display) the path
+    path_to_send = {
+      name: test_name,
+      rgba: active_color_json,
+      start: event.point,
+      path: [],
+      tool: activeTool
+    };
   }
 }
 
@@ -322,19 +347,19 @@ function onMouseDrag(event) {
       bottom: bottom
     });
 
-    // Send paths every 100ms
+    // If timer_is_active = false, set send_paths_timer for 100ms, and set timer_is_active to true
+	// Step 3: set the timer and emit the first draw:progress event to server.
+	//         emit the updated path every 100ms
     if (!timer_is_active) {
-
+	  // Send paths every 100ms then clear
       send_paths_timer = setInterval(function() {
-
         socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
         path_to_send.path = new Array();
-
       }, 100);
-
+	  /* TODO: move line "timer_is_active = true;" inside if statement */
     }
-
     timer_is_active = true;
+
   } else if (activeTool == "select") {
     // Move item locally
     for (x in paper.project.selectedItems) {
@@ -380,20 +405,23 @@ function onMouseUp(event) {
   clearInterval(mouseHeld);
 
   if (activeTool == "draw" || activeTool == "pencil") {
-    // Close the users path
+    // Close this Client's path
+	//same path we created in onMouseDown??
     path.add(event.point);
     path.closed = true;
     path.smooth();
     view.draw();
 
-    // Send the path to other users
+    // add end point to path_to_send before sending to server
     path_to_send.end = event.point;
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
+	// Send the path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
+	// Step 4: Send the draw:end event to the server including path_to_send.end
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
 
-    // Stop new path data being added & sent
+    // Stop new path data being added & sent every 100ms
     clearInterval(send_paths_timer);
     path_to_send.path = new Array();
     timer_is_active = false;
@@ -414,7 +442,24 @@ function onMouseUp(event) {
     }
     item_move_delta = null;
     item_move_timer_is_active = false;
+  }else if (activeTool == "rectangle" || activeTool == "circle") {
+    path = new Path.Rectangle(path_to_send.start, event.point);
+    path.fillColor = active_color_rgb;
+    path.name = path_to_send.name;
+    path.closed = true;
+	if ( activeTool == "circle") {
+	  path.smooth();
+	}
+
+    view.draw();
+
+    // add end point to path_to_send before sending to server
+    path_to_send.end = event.point;
+
+	// Step 4: Send the draw:end event to the server including path_to_send.end
+    socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
   }
+
 
 }
 
@@ -519,7 +564,6 @@ function moveItemsBy1Pixel(point) {
   var itemNames = new Array();
   for (x in paper.project.selectedItems) {
     var item = paper.project.selectedItems[x];
-    console.log(item.segments[0])
     item.position += point;
     itemNames.push(item._name);
   }
@@ -589,6 +633,32 @@ $('#exportPNG').on('click', function() {
   exportPNG();
 });
 
+/* RECT: added button formatting */
+// Step 1: select the tool from toolbar and set activeTool = "rectangle"
+$('#rectangleTool').on('click', function() {
+  $('#editbar > ul > li > a').css({
+	background: ""
+  }); // remove the backgrounds from other buttons
+  $('#rectangleTool > a').css({
+	background: "#eee"
+  }); // set the selecttool css to show it as active
+  activeTool = "rectangle";
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+
+$('#circleTool').on('click', function() {
+  $('#editbar > ul > li > a').css({
+	background: ""
+  }); // remove the backgrounds from other buttons
+  $('#circleTool > a').css({
+	background: "#eee"
+  }); // set the selecttool css to show it as active
+  activeTool = "circle";
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -621,7 +691,6 @@ $('#selectTool').on('click', function() {
   activeTool = "select";
   $('#myCanvas').css('cursor', 'default');
 });
-
 $('#uploadImage').on('click', function() {
   $('#imageInput').click();
 });
@@ -736,33 +805,38 @@ socket.on('settings', function(settings) {
   processSettings(settings);
 });
 
-
+// Step 3.3: every Client receives draw:progress event from Server
 socket.on('draw:progress', function(artist, data) {
-
-  // It wasnt this user who created the event
+  // Step 3.4: If this Client wasn't the original artist draw(display) the path
   if (artist !== uid && data) {
     progress_external_path(JSON.parse(data), artist);
   }
-
 });
 
+// Step 4.3: every Client receives draw:end event from Server
 socket.on('draw:end', function(artist, data) {
-
-  // It wasnt this user who created the event
+  // Step 4.4: If this Client wasn't the original artist draw(display) the path
   if (artist !== uid && data) {
     end_external_path(JSON.parse(data), artist);
   }
 
 });
 
+socket.on('canvas:clear', function() {
+  clearCanvas();
+});
+
+// TODO: fix user count
 socket.on('user:connect', function(user_count) {
   console.log("user:connect");
   update_user_count(user_count);
 });
 
+// TODO: fix user count
 socket.on('user:disconnect', function(user_count) {
   update_user_count(user_count);
 });
+
 
 socket.on('project:load', function(json) {
   console.log("project:load");
@@ -784,10 +858,6 @@ socket.on('project:load', function(json) {
 
 socket.on('project:load:error', function() {
   $('#lostConnection').show();
-});
-
-socket.on('canvas:clear', function() {
-  clearCanvas();
 });
 
 socket.on('loading:start', function() {
@@ -853,9 +923,10 @@ function update_user_count(count) {
   $user_count.text((count === 1) ? "1" : " " + count);
 }
 
+// paths not drawn by this Client
 var external_paths = {};
 
-// Ends a path
+// Ends a path (draws/displays the path for this Client)
 var end_external_path = function(points, artist) {
 
   var path = external_paths[artist];
@@ -871,6 +942,23 @@ var end_external_path = function(points, artist) {
     // Remove the old data
     external_paths[artist] = false;
 
+  }else if (points.tool == "rectangle" || points.tool == "circle") {
+	var start_point = new Point(points.start[1], points.start[2]);
+	var end_point = new Point(points.end[1], points.end[2]);
+    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+	external_paths[artist] = new Path.Rectangle(start_point, end_point);
+    path = external_paths[artist];
+	path.fillColor = color;
+    path.name = points.name;
+	path.closed = true;
+	if ( points.tool == "circle") {
+	  path.smooth();
+	}
+
+	view.draw();
+
+	// Remove the old data
+	external_paths[artist] = false;
   }
 
 };
@@ -897,12 +985,15 @@ progress_external_path = function(points, artist) {
       path.strokeColor = color;
       path.strokeWidth = 2;
     }
+	/* TODO: add else if for rectangle similar to onMouseDown*/
+	/* TODO: add rectangle starting point */
 
     path.name = points.name;
     path.add(start_point);
 
   }
 
+  /* TODO: skip for rectangle, only need start and end point */
   // Draw all the points along the length of the path
   var paths = points.path;
   var length = paths.length;
@@ -918,23 +1009,19 @@ progress_external_path = function(points, artist) {
 
 };
 
+// Default tool is brush(draw), from settings.json
 function processSettings(settings) {
-
   $.each(settings, function(k, v) {
-
     // Handle tool changes
     if (k === "tool") {
       $('.buttonicon-' + v).click();
     }
-
-  })
-
+  });
 }
 
 function chatToggleShow() {
   //If it's currently big, make it small, vice versa
   //If the user does not have a name, ask for one
-
   if($("#chatBox").height() > 100){
     $('#chatMessages').slideUp();
     $('#chatInput').slideUp();
