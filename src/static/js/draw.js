@@ -903,6 +903,18 @@ socket.on('image:add', function(artist, data, position, name) {
 });
 
 socket.on('chat:message', function(uid, message, name) {
+  var isnew = true;
+  for (var i = 0; i < chatters.length; i++){
+    if (uid === chatters[i]){
+      isnew = false;
+    }
+  }
+  if (isnew === true){
+    var acolor = '#'+Math.floor(Math.random()*16777215).toString(16);
+    $('#chatMessages').append($('<li class='+uid.toString()+'>').text(""));
+    $('.'+uid.toString()).css("color",acolor);
+    chatters.push(uid);
+  }
   $('#chatMessages').append($('<li>').text(name + ": " + message));
   if(30 > Math.abs( ($("#chatMessages")[0].scrollTop+ $("#chatMessages").height()) - $("#chatMessages")[0].scrollHeight )) {
   //if the user is scrolled near the bottom, pull their scroll down with new text
