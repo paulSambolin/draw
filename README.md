@@ -31,6 +31,20 @@ Requirements
  * Lib Jpeg
  * Lib Gif
 
+Control Flow
+------------
+bin/run.sh - Shell Script to start Server
+draw/server.js - Server Code, interacts with Client
+draw/src/static/js/draw.js - Client Code, interacts with Server
+draw/src/util/draw.js - Server Utility, interacts with Database
+
+  1. Client connects to Server via :9002
+  2. Client draws path locally
+  3. Client emits draw:progress or draw:end event with path information in JSON
+  4. Server receives draw:* event and JSON
+  5. Server emits draw:* event with JSON to all Clients
+  6. Server draws the path locally and stores in db (so new connections to the room can see drawing)
+
 License
 -------
 Apache 2 License
