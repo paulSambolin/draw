@@ -16,6 +16,13 @@ Installation
   3. Enter the EtherDraw folder `` cd draw ``
   4. Run EtherDraw `` bin/run.sh `` 
   5. Make a drawing!  Open your browser and visit `` http://127.0.0.1:9002 ``
+  
+Note
+----
+If there is an error with node packages or npm package manager, install the correct versions:
+  1. `` sudo npm install -g n ``
+  2. `` sudo n 0.10.25 ``
+  3. `` sudo npm install -g npm@1.3.10 ``
 
 Requirements
 ------------
