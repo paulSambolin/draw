@@ -105,7 +105,7 @@ io.sockets.on('connection', function (socket) {
     // TODO: We should have logic here to remove a drawing from memory as we did previously
   });
 
-  // EVENT: User stops drawing something
+  // EVENT: User begins or continues drawing something
   // Having room as a parameter is not good for secure rooms
   socket.on('draw:progress', function (room, uid, co_ordinates) {
     if (!projects.projects[room] || !projects.projects[room].project) {

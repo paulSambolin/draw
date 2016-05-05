@@ -261,7 +261,7 @@ function onMouseDown(event) {
   }, 100);
 
   if (activeTool == "draw" || activeTool == "pencil") {
-    var point = event.point;
+	//The local path for this client
     path = new Path();
     if (activeTool == "draw") {
       path.fillColor = active_color_rgb;
@@ -273,8 +273,8 @@ function onMouseDown(event) {
     path.name = uid + ":" + (++paper_object_count);
     view.draw();
 
-    // The data to be sent to server
-	// Is used by the other Clients to draw(display) the path
+    // The data to be sent to Server in JSON
+	// Is used by the other Clients to draw(display) their own local path
     path_to_send = {
       name: path.name,
       rgba: active_color_json,
@@ -296,11 +296,10 @@ function onMouseDown(event) {
       paper.project.activeLayer.selected = false;
     }
   }
-  // Step 2: else if activeTool = rectangle create new path, add starting point and create path_to_send
-  /* TODO: add else if */
+  // If it is a rectangle or circle then record the start point
   else if (activeTool == "rectangle" || activeTool == "circle") {
     var test_name = uid + ":" + (++paper_object_count);
-    // The data to be sent to server
+    // The data to be sent to server in JSON
 	// Is used by the other Clients to draw(display) the path
     path_to_send = {
       name: test_name,
@@ -336,27 +335,24 @@ function onMouseDrag(event) {
       var top = event.middlePoint;
       bottom = event.middlePoint;
     }
+	// Add data to local path
     path.add(top);
     path.insert(0, bottom);
     path.smooth();
     view.draw();
 
-    // Add data to path
+    // Add data to path_to_send
     path_to_send.path.push({
       top: top,
       bottom: bottom
     });
 
-    // If timer_is_active = false, set send_paths_timer for 100ms, and set timer_is_active to true
-	// Step 3: set the timer and emit the first draw:progress event to server.
-	//         emit the updated path every 100ms
     if (!timer_is_active) {
-	  // Send paths every 100ms then clear
+	  // Send path updates every 100ms
       send_paths_timer = setInterval(function() {
         socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
         path_to_send.path = new Array();
       }, 100);
-	  /* TODO: move line "timer_is_active = true;" inside if statement */
     }
     timer_is_active = true;
 
@@ -402,11 +398,12 @@ function onMouseUp(event) {
   if (event.event.button == 1 || event.event.button == 2) {
     return;
   }
+  
+  
   clearInterval(mouseHeld);
 
   if (activeTool == "draw" || activeTool == "pencil") {
     // Close this Client's path
-	//same path we created in onMouseDown??
     path.add(event.point);
     path.closed = true;
     path.smooth();
@@ -416,12 +413,12 @@ function onMouseUp(event) {
     path_to_send.end = event.point;
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
-	// Send the path to the Server
+	// Send the updated path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
-	// Step 4: Send the draw:end event to the server including path_to_send.end
+	// Send draw:end event to the Server with the end point
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
 
-    // Stop new path data being added & sent every 100ms
+    // Stop sending path updates to Server
     clearInterval(send_paths_timer);
     path_to_send.path = new Array();
     timer_is_active = false;
@@ -453,14 +450,11 @@ function onMouseUp(event) {
 
     view.draw();
 
-    // add end point to path_to_send before sending to server
-    path_to_send.end = event.point;
-
-	// Step 4: Send the draw:end event to the server including path_to_send.end
+	// add end point to path_to_send before sending to server
+	path_to_send.end = event.point;
+	// Send draw:end event to the Server with the end point
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
   }
-
-
 }
 
 var key_move_delta;
@@ -632,9 +626,6 @@ $('#exportSVG').on('click', function() {
 $('#exportPNG').on('click', function() {
   exportPNG();
 });
-
-/* RECT: added button formatting */
-// Step 1: select the tool from toolbar and set activeTool = "rectangle"
 $('#rectangleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
 	background: ""
@@ -646,7 +637,6 @@ $('#rectangleTool').on('click', function() {
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
-
 $('#circleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
 	background: ""
@@ -658,7 +648,6 @@ $('#circleTool').on('click', function() {
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
-
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -805,17 +794,15 @@ socket.on('settings', function(settings) {
   processSettings(settings);
 });
 
-// Step 3.3: every Client receives draw:progress event from Server
 socket.on('draw:progress', function(artist, data) {
-  // Step 3.4: If this Client wasn't the original artist draw(display) the path
+  // If this Client wasn't the original artist draw(display) the path
   if (artist !== uid && data) {
     progress_external_path(JSON.parse(data), artist);
   }
 });
 
-// Step 4.3: every Client receives draw:end event from Server
 socket.on('draw:end', function(artist, data) {
-  // Step 4.4: If this Client wasn't the original artist draw(display) the path
+  // If this Client wasn't the original artist draw(display) the path
   if (artist !== uid && data) {
     end_external_path(JSON.parse(data), artist);
   }
@@ -923,10 +910,10 @@ function update_user_count(count) {
   $user_count.text((count === 1) ? "1" : " " + count);
 }
 
-// paths not drawn by this Client
+// Set of paths NOT drawn locally by this Client
 var external_paths = {};
 
-// Ends a path (draws/displays the path for this Client)
+// Ends a path NOT drawn locally by this Client
 var end_external_path = function(points, artist) {
 
   var path = external_paths[artist];
@@ -943,6 +930,7 @@ var end_external_path = function(points, artist) {
     external_paths[artist] = false;
 
   }else if (points.tool == "rectangle" || points.tool == "circle") {
+	// Use start and end point to create a new shape
 	var start_point = new Point(points.start[1], points.start[2]);
 	var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
@@ -963,12 +951,12 @@ var end_external_path = function(points, artist) {
 
 };
 
-// Continues to draw a path in real time
+// Continues to draw a path NOT drawn locally by this client
 progress_external_path = function(points, artist) {
 
   var path = external_paths[artist];
 
-  // The path hasnt already been started
+  // The path hasn't already been started
   // So start it
   if (!path) {
 
@@ -985,15 +973,12 @@ progress_external_path = function(points, artist) {
       path.strokeColor = color;
       path.strokeWidth = 2;
     }
-	/* TODO: add else if for rectangle similar to onMouseDown*/
-	/* TODO: add rectangle starting point */
 
     path.name = points.name;
     path.add(start_point);
 
   }
-
-  /* TODO: skip for rectangle, only need start and end point */
+  
   // Draw all the points along the length of the path
   var paths = points.path;
   var length = paths.length;
@@ -1009,7 +994,7 @@ progress_external_path = function(points, artist) {
 
 };
 
-// Default tool is brush(draw), from settings.json
+// Default tool is brush(draw)
 function processSettings(settings) {
   $.each(settings, function(k, v) {
     // Handle tool changes
