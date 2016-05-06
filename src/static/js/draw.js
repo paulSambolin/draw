@@ -1,14 +1,9 @@
-// Please refactor me, this is mostly a complete car crash with globals everywhere.
-
-tool.minDistance = 10;
-tool.maxDistance = 45;
-
 // room = end of URL
-var room = window.location.pathname.split("/")[2];
+var room = window.location.pathname.split('/')[2];
 
 function pickColor(color) {
-  $('#color').val(color);
   var rgb = hexToRgb(color);
+  $('#color').val(color);
   $('#activeColorSwatch').css('background-color', 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')');
   update_active_color();
 }
@@ -19,17 +14,17 @@ function pickColor(color) {
  * @param cursor {Point} Cursor position relative to the page
  */
 function positionPickerInCanvas(cursor) {
-  var picker = $('#mycolorpicker');
+  var picker = $('#mycolorpicker'),
 
-  // Determine best place for color picker so it isn't off the screen
-  var pickerSize = new Point(picker.width(), picker.height());
-  var windowSize = new Point($(window).width(), $(window).height());
-  var spacer = new Point(10, 0);
+    // Determine best place for color picker so it isn't off the screen
+    pickerSize = new Point(picker.width(), picker.height()),
+    windowSize = new Point($(window).width(), $(window).height()),
+    spacer = new Point(10, 0),
 
-  var brSpace = windowSize - spacer - cursor;
-  var tlSpace = cursor - spacer;
+    brSpace = windowSize - spacer - cursor,
+    tlSpace = cursor - spacer,
 
-  var newPos = new Point();
+    newPos = new Point();
 
   // Choose sides based on page size
   if (tlSpace.x > pickerSize.x) {
@@ -41,10 +36,10 @@ function positionPickerInCanvas(cursor) {
 
   // Get the canvasContainer's position so we can make sure the picker
   // doesn't go outside of the canvasContainer (to keep it pretty)
-  var minY = 10;
-  // Buffer so we don't get too close to the bottom cause scroll bars
-  var bBuffer = Math.max(50, (windowSize.y - ($('#canvasContainer').position().top
-      + $('#canvasContainer').height())) + 70);
+  var minY = 10,
+  
+    // Buffer so we don't get too close to the bottom cause scroll bars
+    bBuffer = Math.max(50, (windowSize.y - ($('#canvasContainer').position().top + $('#canvasContainer').height())) + 70);
 
   // Favour having the picker in the middle of the cursor
   if (tlSpace.y > ((pickerSize.y / 2) + minY) && brSpace.y > ((pickerSize.y / 2) + bBuffer)) {
@@ -56,12 +51,12 @@ function positionPickerInCanvas(cursor) {
   }
 
   $('#mycolorpicker').css({
-    "left": newPos.x,
-    "top": newPos.y
-  }); // make it in the smae position
+    'left': newPos.x,
+    'top': newPos.y
+  }); // Put color picker in the same position
 }
 
-/*http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb*/
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -73,11 +68,12 @@ function hexToRgb(hex) {
 
 
 $(document).ready(function() {
-  var drawurl = window.location.href.split("?")[0]; // get the drawing url
-  $('#embedinput').val("<iframe name='embed_readwrite' src='" + drawurl + "?showControls=true&showChat=true&showLineNumbers=true&useMonospaceFont=false' width=600 height=400></iframe>"); // write it to the embed input
+  var drawurl = window.location.href.split('?')[0]; // get the drawing url
+  
+  $('#embedinput').val("<iframe name='embed_readwrite' src='' + drawurl + '?showControls=true&showChat=true&showLineNumbers=true&useMonospaceFont=false' width=600 height=400></iframe>"); // write it to the embed input
   $('#linkinput').val(drawurl); // and the share/link input
   $('#drawTool > a').css({
-    background: "#eee"
+    background: '#eee'
   }); // set the drawtool css to show it as active
 
   $('#myCanvas').bind('mousewheel', function(ev) {
@@ -88,19 +84,18 @@ $(document).ready(function() {
     scrolled(ev.pageX, ev.pageY, ev.detail);
   });
 
-  var drawingPNG = localStorage.getItem("drawingPNG"+room)
+  var drawingPNG = localStorage.getItem('drawingPNG' + room);
 
   // Temporarily set background as image from memory to improve UX
-  $('#canvasContainer').css("background-image", 'url(' + drawingPNG + ')');
+  $('#canvasContainer').css('background-image', 'url(' + drawingPNG + ')');
 
 });
 
+// Far too buggy for now
+/*
 var scaleFactor = 1.1;
-
-function scrolled(x, y, delta) {
-  // Far too buggy for now
-  /*
-  console.log("Scrolling");
+function scrolled(x, y, delta) {  
+  console.log('Scrolling');
   var pt = new Point(x, y),
   scale = 1;
   if(delta < 0) {
@@ -111,33 +106,34 @@ function scrolled(x, y, delta) {
   //view.scale(scale, pt);
   $('#myCanvas').
   view.draw();
-  */
+  
 }
-
+*/
 
 $('#activeColorSwatch').css('background-color', $('.colorSwatch.active').css('background-color'));
 
 // Initialise Socket.io
 var socket = io.connect('/');
 
-// Random User ID
-// Used when sending data
+// Random User ID, used when sending data
 var uid = (function() {
   var S4 = function() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
   };
-  return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+  return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4());
 }());
 
 function getParameterByName(name) {
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.search);
+  name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
+  
+  var regexS = '[\\?&]' + name + '=([^&#]*)',
+    regex = new RegExp(regexS),
+    results = regex.exec(window.location.search);
+  
   if (results == null) {
-    return "";
+    return '';
   } else {
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
+    return decodeURIComponent(results[1].replace(/\+/g, ' '));
   }
 }
 
@@ -146,49 +142,50 @@ socket.emit('subscribe', {
   room: room
 });
 
-// JSON data ofthe users current drawing
+// JSON data of the users current drawing
 // Is sent to the user
-var path_to_send = {};
+var path_to_send = {},
 
-// Calculates colors
-var active_color_rgb;
-var active_color_json = {};
-var $opacity = $('#opacityRangeVal');
+  // Calculates colors
+  active_color_rgb,
+  active_color_json = {};
+
 var update_active_color = function() {
   var rgb_array = $('#activeColorSwatch').css('background-color');
-  $('#editbar').css("border-bottom", "solid 2px " + rgb_array);
+  $('#editbar').css('border-bottom', 'solid 2px ' + rgb_array);
 
-  while (rgb_array.indexOf(" ") > -1) {
-    rgb_array = rgb_array.replace(" ", "");
+  while (rgb_array.indexOf(' ') > -1) {
+    rgb_array = rgb_array.replace(' ', '');
   }
   rgb_array = rgb_array.substr(4, rgb_array.length - 5);
   rgb_array = rgb_array.split(',');
-  var red = rgb_array[0] / 255;
-  var green = rgb_array[1] / 255;
-  var blue = rgb_array[2] / 255;
-  var opacity = $opacity.val() / 255;
+  
+  // Calculate RGB + opacity
+  var red = rgb_array[0] / 255,
+    green = rgb_array[1] / 255,
+    blue = rgb_array[2] / 255,
+    opacity = $('#opacityRangeVal').val() / 255;
 
   active_color_rgb = new RgbColor(red, green, blue, opacity);
   active_color_rgb._alpha = opacity;
   active_color_json = {
-    "red": red || 0,
-    "green": green,
-    "blue": blue,
-    "opacity": opacity
+    'red': red || 0,
+    'green': green,
+    'blue': blue,
+    'opacity': opacity
   };
 };
 
 // Get the active color from the UI elements
-var authorColor = getParameterByName('authorColor');
-var authorColors = {};
-if (authorColor != "" && authorColor.substr(0, 4) == "rgb(") {
-  authorColor = authorColor.substr(4, authorColor.indexOf(")") - 4);
-  authorColors = authorColor.split(",");
-  $('#activeColorSwatch').css('background-color', 'rgb(' + authorColors[0] + ',' + authorColors[1] + ',' + authorColors[2] + ')');
+var authorColor = getParameterByName('authorColor'),
+  authorColorList = {};
+
+if (authorColor != '' && authorColor.substr(0, 4) == 'rgb(') {
+  authorColor = authorColor.substr(4, authorColor.indexOf(')') - 4);
+  authorColorList = authorColor.split(',');
+  $('#activeColorSwatch').css('background-color', 'rgb(' + authorColorList[0] + ',' + authorColorList[1] + ',' + authorColorList[2] + ')');
 }
 update_active_color();
-
-
 
 $('#colorToggle').on('click', function() {
   if ($('#mycolorpicker').toggle().is(':visible')) {
@@ -197,7 +194,7 @@ $('#colorToggle').on('click', function() {
 });
 
 $('#clearImage').click(function() {
-  var p = confirm("Are you sure you want to clear the drawing for everyone?");
+  var p = confirm('Are you sure you want to clear the drawing for everyone?');
   if (p) {
     clearCanvas();
     socket.emit('canvas:clear', room);
@@ -212,18 +209,18 @@ $('.toggleBackground').click(function() {
 // DRAWING EVENTS
 
 
-var send_paths_timer;
-var timer_is_active = false;
-var paper_object_count = 0;
-var activeTool = "draw";
-var mouseTimer = 0; // used for getting if the mouse is being held down but not dragged IE when bringing up color picker
-var mouseHeld; // global timer for if mouse is held.
+var send_paths_timer,
+  timer_is_active = false,
+  paper_object_count = 0,
+  activeTool = 'draw',
+  mouseTimer = 0, // used for getting if the mouse is being held down but not dragged IE when bringing up color picker
+  mouseHeld; // global timer for if mouse is held.
 
 
 function onMouseDown(event) {
   // If it's middle mouse button do nothing -- This will be reserved for panning in the future.
   if (event.which === 2) {
-	  return;
+    return;
   }
 
   // Hide popups if visible
@@ -243,18 +240,19 @@ function onMouseDown(event) {
   // Reset Mouse Timer
   mouseTimer = 0;
 
-  // Set Global mouse timer to interval of 100ms??
-  mouseHeld = setInterval(function() { // is the mouse being held and not dragged?
+  // Set Global mouse timer to interval of 100ms
+  mouseHeld = setInterval(function() {
     mouseTimer++;
     if (mouseTimer > 3) {
       mouseTimer = 0;
       clearInterval(mouseHeld);
       var picker = $('#mycolorpicker');
-      picker.toggle(); // show the color picker
+      picker.toggle(); // display the color picker
       if (picker.is(':visible')) {
         // Mad hackery to get round issues with event.point
-        var targetPos = $(event.event.target).position();
-        var point = event.point + new Point(targetPos.left, targetPos.top);
+        var targetPos = $(event.event.target).position(),
+          point = event.point + new Point(targetPos.left, targetPos.top);
+        
         positionPickerInCanvas(point);
       }
     }
@@ -262,29 +260,27 @@ function onMouseDown(event) {
 
   if (activeTool == "draw" || activeTool == "pencil") {
 	//The local path for this client
-    path = new Path();
-    if (activeTool == "draw") {
+    if (activeTool == 'draw') {
       path.fillColor = active_color_rgb;
-    } else if (activeTool == "pencil") {
+    } else if (activeTool == 'pencil') {
       path.strokeColor = active_color_rgb;
       path.strokeWidth = 2;
     }
     path.add(event.point);
-    path.name = uid + ":" + (++paper_object_count);
+    path.name = uid + ':' + (++paper_object_count);
     view.draw();
 
     // The data to be sent to Server in JSON
 	// Is used by the other Clients to draw(display) their own local path
-    path_to_send = {
       name: path.name,
       rgba: active_color_json,
       start: event.point,
       path: [],
       tool: activeTool
     };
-  } else if (activeTool == "select") {
+  } else if (activeTool == 'select') {
     // Select item
-    $("#myCanvas").css("cursor", "pointer");
+    $('#myCanvas').css('cursor', 'pointer');
     if (event.item) {
       // If holding shift key down, don't clear selection - allows multiple selections
       if (!event.event.shiftKey) {
@@ -301,7 +297,6 @@ function onMouseDown(event) {
     var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server in JSON
 	// Is used by the other Clients to draw(display) the path
-    path_to_send = {
       name: test_name,
       rgba: active_color_json,
       start: event.point,
@@ -311,12 +306,11 @@ function onMouseDown(event) {
   }
 }
 
-var item_move_delta;
-var send_item_move_timer;
-var item_move_timer_is_active = false;
+var item_move_delta,
+  send_item_move_timer,
+  item_move_timer_is_active = false;
 
 function onMouseDrag(event) {
-
   mouseTimer = 0;
   clearInterval(mouseHeld);
 
@@ -325,14 +319,18 @@ function onMouseDrag(event) {
     return;
   }
 
-  if (activeTool == "draw" || activeTool == "pencil") {
-    var step = event.delta / 2;
+  if (activeTool == 'draw' || activeTool == 'pencil') {
+    var step = event.delta / 2,
+      top,
+      bottom,
+      item;
+    
     step.angle += 90;
-    if (activeTool == "draw") {
-      var top = event.middlePoint + step;
-      var bottom = event.middlePoint - step;
-    } else if (activeTool == "pencil") {
-      var top = event.middlePoint;
+    if (activeTool == 'draw') {
+      top = event.middlePoint + step;
+      bottom = event.middlePoint - step;
+    } else if (activeTool == 'pencil') {
+      top = event.middlePoint;
       bottom = event.middlePoint;
     }
 	// Add data to local path
@@ -349,17 +347,15 @@ function onMouseDrag(event) {
 
     if (!timer_is_active) {
 	  // Send path updates every 100ms
-      send_paths_timer = setInterval(function() {
         socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
         path_to_send.path = new Array();
       }, 100);
-    }
     timer_is_active = true;
 
-  } else if (activeTool == "select") {
+  } else if (activeTool == 'select') {
     // Move item locally
     for (x in paper.project.selectedItems) {
-      var item = paper.project.selectedItems[x];
+      item = paper.project.selectedItems[x];
       item.position += event.delta;
     }
 
@@ -371,14 +367,14 @@ function onMouseDrag(event) {
         item_move_delta += event.delta;
       }
     }
-
+    
     // Send move updates every 50 ms
     if (!item_move_timer_is_active) {
       send_item_move_timer = setInterval(function() {
         if (item_move_delta) {
           var itemNames = new Array();
           for (x in paper.project.selectedItems) {
-            var item = paper.project.selectedItems[x];
+            item = paper.project.selectedItems[x];
             itemNames.push(item._name);
           }
           socket.emit('item:move:progress', room, uid, itemNames, item_move_delta);
@@ -388,12 +384,9 @@ function onMouseDrag(event) {
     }
     item_move_timer_is_active = true;
   }
-
 }
 
-
 function onMouseUp(event) {
-
   // Ignore middle or right mouse button clicks for now
   if (event.event.button == 1 || event.event.button == 2) {
     return;
@@ -402,29 +395,29 @@ function onMouseUp(event) {
   
   clearInterval(mouseHeld);
 
-  if (activeTool == "draw" || activeTool == "pencil") {
+  if (activeTool == 'draw' || activeTool == 'pencil') {
     // Close this Client's path
-    path.add(event.point);
     path.closed = true;
     path.smooth();
     view.draw();
 
     // add end point to path_to_send before sending to server
     path_to_send.end = event.point;
+    
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
 	// Send the updated path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
 	// Send draw:end event to the Server with the end point
-    socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
 
     // Stop sending path updates to Server
     clearInterval(send_paths_timer);
     path_to_send.path = new Array();
     timer_is_active = false;
-  } else if (activeTool == "select") {
+  } else if (activeTool == 'select') {
     // End movement timer
     clearInterval(send_item_move_timer);
+    
     if (item_move_delta) {
       // Send any remaining movement info
       var itemNames = new Array();
@@ -439,39 +432,38 @@ function onMouseUp(event) {
     }
     item_move_delta = null;
     item_move_timer_is_active = false;
-  }else if (activeTool == "rectangle" || activeTool == "circle") {
+  } else if (activeTool == 'rectangle' || activeTool == 'circle') {
     path = new Path.Rectangle(path_to_send.start, event.point);
     path.fillColor = active_color_rgb;
     path.name = path_to_send.name;
     path.closed = true;
-	if ( activeTool == "circle") {
-	  path.smooth();
-	}
-
+    
+    if ( activeTool == 'circle') {
+      path.smooth();
+    }
     view.draw();
 
 	// add end point to path_to_send before sending to server
 	path_to_send.end = event.point;
 	// Send draw:end event to the Server with the end point
-    socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
   }
 }
 
-var key_move_delta;
-var send_key_move_timer;
-var key_move_timer_is_active = false;
+var key_move_delta,
+  send_key_move_timer,
+  key_move_timer_is_active = false;
 
 function onKeyDown(event) {
-  if (activeTool == "select") {
+  if (activeTool == 'select') {
     var point = null;
 
-    if (event.key == "up") {
+    if (event.key == 'up') {
       point = new paper.Point(0, -1);
-    } else if (event.key == "down") {
+    } else if (event.key == 'down') {
       point = new paper.Point(0, 1);
-    } else if (event.key == "left") {
+    } else if (event.key == 'left') {
       point = new paper.Point(-1, 0);
-    } else if (event.key == "right") {
+    } else if (event.key == 'right') {
       point = new paper.Point(1, 0);
     }
 
@@ -510,12 +502,13 @@ function onKeyDown(event) {
 
 
 function onKeyUp(event) {
-  if (event.key == "delete") {
+  var item;
+  if (event.key == 'delete') {
     // Delete selected items
     var items = paper.project.selectedItems;
     if (items) {
       for (x in items) {
-        var item = items[x];
+        item = items[x];
         socket.emit('item:remove', room, uid, item.name);
         item.remove();
         view.draw();
@@ -523,14 +516,14 @@ function onKeyUp(event) {
     }
   }
 
-  if (activeTool == "select") {
+  if (activeTool == 'select') {
     // End arrow key movement timer
     clearInterval(send_key_move_timer);
     if (key_move_delta) {
       // Send any remaining movement info
       var itemNames = new Array();
       for (x in paper.project.selectedItems) {
-        var item = paper.project.selectedItems[x];
+        item = paper.project.selectedItems[x];
         itemNames.push(item._name);
       }
       socket.emit('item:move:end', room, uid, itemNames, key_move_delta);
@@ -577,109 +570,126 @@ $('#myCanvas').bind('drop', function(e) {
     e.preventDefault();
   }
   e = e.originalEvent;
-  var dt = e.dataTransfer;
-  var files = dt.files;
+  
+  var dt = e.dataTransfer,
+    files = dt.files,
+    singleFile;
+  
   for (var i = 0; i < files.length; i++) {
-    var file = files[i];
-    uploadImage(file);
+    singleFile = files[i];
+    uploadImage(singleFile);
   }
 });
-
-
-
 
 // ---------------------------------
 // CONTROLS EVENTS
 
 var $color = $('.colorSwatch:not(#pickerSwatch)');
 $color.on('click', function() {
-
   $color.removeClass('active');
   $(this).addClass('active');
   $('#activeColorSwatch').css('background-color', $(this).css('background-color'));
   update_active_color();
-
 });
 
 $('#pickerSwatch').on('click', function(event) {
   $('#mycolorpicker').toggle();
 });
+
 $('#settingslink').on('click', function() {
   $('#settings').fadeToggle();
 });
+
 $('#embedlink').on('click', function() {
   $('#embed').fadeToggle();
 });
+
 $('#importExport').on('click', function() {
   $('#importexport').fadeToggle();
 });
+
 $('#usericon').on('click', function() {
   $('#mycolorpicker').fadeToggle();
 });
+
 $('#clearCanvas').on('click', function() {
   clearCanvas();
   socket.emit('canvas:clear', room);
 });
+
 $('#exportSVG').on('click', function() {
   exportSVG();
 });
+
 $('#exportPNG').on('click', function() {
   exportPNG();
 });
-$('#rectangleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
-	background: ""
+    background: ''
   }); // remove the backgrounds from other buttons
+  
   $('#rectangleTool > a').css({
-	background: "#eee"
+    background: '#eee'
   }); // set the selecttool css to show it as active
-  activeTool = "rectangle";
+  
+  activeTool = 'rectangle';
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
 $('#circleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
-	background: ""
+    background: ''
   }); // remove the backgrounds from other buttons
+  
   $('#circleTool > a').css({
-	background: "#eee"
+    background: '#eee'
   }); // set the selecttool css to show it as active
-  activeTool = "circle";
+  
+  activeTool = 'circle';
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
-    background: ""
+    background: ''
   }); // remove the backgrounds from other buttons
+  
   $('#pencilTool > a').css({
-    background: "#eee"
+    background: '#eee'
   }); // set the selecttool css to show it as active
-  activeTool = "pencil";
+  
+  activeTool = 'pencil';
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#drawTool').on('click', function() {
   $('#editbar > ul > li > a').css({
-    background: ""
+    background: ''
   }); // remove the backgrounds from other buttons
+  
   $('#drawTool > a').css({
-    background: "#eee"
+    background: '#eee'
   }); // set the selecttool css to show it as active
-  activeTool = "draw";
+  
+  activeTool = 'draw';
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#selectTool').on('click', function() {
   $('#editbar > ul > li > a').css({
-    background: ""
+    background: ''
   }); // remove the backgrounds from other buttons
+  
   $('#selectTool > a').css({
-    background: "#eee"
+    background: '#eee'
   }); // set the selecttool css to show it as active
-  activeTool = "select";
+  
+  activeTool = 'select';
   $('#myCanvas').css('cursor', 'default');
 });
+
 $('#uploadImage').on('click', function() {
   $('#imageInput').click();
 });
@@ -716,24 +726,24 @@ function encodeAsImgAndLink(svg) {
   if ($.browser.msie) {
     // Add some critical information
     svg.setAttribute('version', '1.1');
-    var dummy = document.createElement('div');
-    dummy.appendChild(svg);
+    var newDiv = document.createElement('div');
+    newDiv.appendChild(svg);
     window.winsvg = window.open('/static/html/export.html');
-    window.winsvg.document.write(dummy.innerHTML);
+    window.winsvg.document.write(newDiv.innerHTML);
     window.winsvg.document.body.style.margin = 0;
   } else {
+    
     // Add some critical information
     svg.setAttribute('version', '1.1');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
 
-    var dummy = document.createElement('div');
-    dummy.appendChild(svg);
+    var newDiv = document.createElement('div');
+    newDiv.appendChild(svg);
 
-    var b64 = Base64.encode(dummy.innerHTML);
-
-    //window.winsvg = window.open("data:image/svg+xml;base64,\n"+b64);
-    var html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />"
+    var b64 = Base64.encode(newDiv.innerHTML),
+      html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64,' + b64 + '' />";
+    
     window.winsvg = window.open();
     window.winsvg.document.write(html);
     window.winsvg.document.body.style.margin = 0;
@@ -745,8 +755,8 @@ function encodeAsImgAndLink(svg) {
 // local filesystem. This skips making a round trip to the server
 // for a POST.
 function exportPNG() {
-  var canvas = document.getElementById('myCanvas');
-  var html = "<img src='" + canvas.toDataURL('image/png') + "' />"
+  var html = "<img src='' + canvas.toDataURL('image/png') + '' />";
+  
   if ($.browser.msie) {
     window.winpng = window.open('/static/html/export.html');
     window.winpng.document.write(html);
@@ -760,11 +770,13 @@ function exportPNG() {
 }
 
 // User selects an image from the file browser to upload
-$('#imageInput').bind('change', function(e) {
+$('#imageInput').bind('change', function() {
   // Get selected files
-  var files = document.getElementById('imageInput').files;
+  var files = document.getElementById('imageInput').files,
+    file;
+  
   for (var i = 0; i < files.length; i++) {
-    var file = files[i];
+    file = files[i];
     uploadImage(file);
   }
 });
@@ -774,13 +786,13 @@ function uploadImage(file) {
 
   //attach event handler
   reader.readAsDataURL(file);
-  $(reader).bind('loadend', function(e) {
+  $(reader).bind('loadend', function() {
     var bin = this.result;
 
     //Add to paper project here
     var raster = new Raster(bin);
     raster.position = view.center;
-    raster.name = uid + ":" + (++paper_object_count);
+    raster.name = uid + ':' + (++paper_object_count);
     socket.emit('image:add', room, uid, JSON.stringify(bin), raster.position, raster.name);
   });
 }
@@ -806,7 +818,6 @@ socket.on('draw:end', function(artist, data) {
   if (artist !== uid && data) {
     end_external_path(JSON.parse(data), artist);
   }
-
 });
 
 socket.on('canvas:clear', function() {
@@ -815,7 +826,7 @@ socket.on('canvas:clear', function() {
 
 // TODO: fix user count
 socket.on('user:connect', function(user_count) {
-  console.log("user:connect");
+  console.log('user:connect');
   update_user_count(user_count);
 });
 
@@ -826,7 +837,7 @@ socket.on('user:disconnect', function(user_count) {
 
 
 socket.on('project:load', function(json) {
-  console.log("project:load");
+  console.log('project:load');
   paper.project.activeLayer.remove();
   paper.project.importJSON(json.project);
 
@@ -835,12 +846,12 @@ socket.on('project:load', function(json) {
   // Make sure the range event doesn't propogate to pep
   $('#opacityRangeVal').on('touchstart MSPointerDown mousedown', function(ev) {
     ev.stopPropagation();
-  }).on('change', function(ev) {
+  }).on('change', function() {
     update_active_color();
-  })
+  });
 
   view.draw();
-  $.get("../static/img/wheel.png");
+  $.get('../static/img/wheel.png');
 });
 
 socket.on('project:load:error', function() {
@@ -848,16 +859,13 @@ socket.on('project:load:error', function() {
 });
 
 socket.on('loading:start', function() {
-  // console.log("loading:start");
   $('#loading').show();
 });
 
 socket.on('loading:end', function() {
   $('#loading').hide();
   $('#colorpicker').farbtastic(pickColor); // make a color picker
-  // cake
-  $('#canvasContainer').css("background-image", 'none');
-
+  $('#canvasContainer').css('background-image', 'none');
 });
 
 socket.on('item:remove', function(artist, name) {
@@ -870,9 +878,8 @@ socket.on('item:remove', function(artist, name) {
 socket.on('item:move', function(artist, itemNames, delta) {
   if (artist != uid) {
     for (x in itemNames) {
-      var itemName = itemNames[x];
-      if (paper.project.activeLayer._namedChildren[itemName][0]) {
-        paper.project.activeLayer._namedChildren[itemName][0].position += new Point(delta[1], delta[2]);
+      if (paper.project.activeLayer._namedChildren[itemNames[x][0]]) {
+        paper.project.activeLayer._namedChildren[itemNames[x][0]].position += new Point(delta[1], delta[2]);
       }
     }
     view.draw();
@@ -910,9 +917,7 @@ socket.on('chat:message', function(uid, message, name) {
   if(30 > Math.abs( ($("#chatMessages")[0].scrollTop+ $("#chatMessages").height()) - $("#chatMessages")[0].scrollHeight )) {
   //if the user is scrolled near the bottom, pull their scroll down with new text
     $("#chatMessages").scrollTop($("#chatMessages")[0].scrollHeight);
-  }
 });
-
 
 console.log(view);
 
@@ -923,7 +928,7 @@ console.log(view);
 var $user_count = $('#online_count');
 
 function update_user_count(count) {
-  $user_count.text((count === 1) ? "1" : " " + count);
+  $user_count.text((count === 1) ? '1' : ' ' + count);
 }
 
 // Set of paths NOT drawn locally by this Client
@@ -935,7 +940,6 @@ var end_external_path = function(points, artist) {
   var path = external_paths[artist];
 
   if (path) {
-
     // Close the path
     path.add(new Point(points.end[1], points.end[2]));
     path.closed = true;
@@ -951,25 +955,23 @@ var end_external_path = function(points, artist) {
 	var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
 	external_paths[artist] = new Path.Rectangle(start_point, end_point);
-    path = external_paths[artist];
-	path.fillColor = color;
+    path.fillColor = color;
     path.name = points.name;
-	path.closed = true;
-	if ( points.tool == "circle") {
-	  path.smooth();
-	}
+    path.closed = true;
+    
+    if ( points.tool == 'circle') {
+      path.smooth();
+    }
+    
+    view.draw();
 
-	view.draw();
-
-	// Remove the old data
-	external_paths[artist] = false;
+    // Remove the old data
+    external_paths[artist] = false;
   }
-
 };
 
 // Continues to draw a path NOT drawn locally by this client
 progress_external_path = function(points, artist) {
-
   var path = external_paths[artist];
 
   // The path hasn't already been started
@@ -983,14 +985,13 @@ progress_external_path = function(points, artist) {
     // Starts the path
     var start_point = new Point(points.start[1], points.start[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-    if (points.tool == "draw") {
+    if (points.tool == 'draw') {
       path.fillColor = color;
-    } else if (points.tool == "pencil") {
+    } else if (points.tool == 'pencil') {
       path.strokeColor = color;
       path.strokeWidth = 2;
     }
 
-    path.name = points.name;
     path.add(start_point);
 
   }
@@ -999,22 +1000,19 @@ progress_external_path = function(points, artist) {
   var paths = points.path;
   var length = paths.length;
   for (var i = 0; i < length; i++) {
-
     path.add(new Point(paths[i].top[1], paths[i].top[2]));
     path.insert(0, new Point(paths[i].bottom[1], paths[i].bottom[2]));
-
   }
 
   path.smooth();
   view.draw();
-
 };
 
 // Default tool is brush(draw)
 function processSettings(settings) {
   $.each(settings, function(k, v) {
     // Handle tool changes
-    if (k === "tool") {
+    if (k === 'tool') {
       $('.buttonicon-' + v).click();
     }
   });
@@ -1023,16 +1021,16 @@ function processSettings(settings) {
 function chatToggleShow() {
   //If it's currently big, make it small, vice versa
   //If the user does not have a name, ask for one
-  if($("#chatBox").height() > 100){
+  if($('#chatBox').height() > 100){
     $('#chatMessages').slideUp();
     $('#chatInput').slideUp();
   } else {
-    if(chatName === "" || chatName === null){
-      chatName = prompt("What is your name?", "");
+    if(chatName === '' || chatName === null){
+      chatName = prompt('What is your name?', '');
     }
     if(chatName !== null){
-      if (chatName === ""){
-        chatName = "Anon"+(Math.floor(Math.random()*1000)).toString();
+      if (chatName === ''){
+        chatName = 'Anon'+(Math.floor(Math.random() * 1000)).toString();
       }
       $('#chatMessages').slideDown();
       $('#chatInput').slideDown();
@@ -1041,25 +1039,25 @@ function chatToggleShow() {
 }
 
 function sendChatMessage() {
-    //get the text, emit it, clear the text
-    var message = $('#chatInput').val();
-    socket.emit('chat:message', room, uid, message, chatName || "unnamed");
-    $('#chatInput').val('');
-    return(false);//prevents page reload on submit
+  //get the text, emit it, clear the text
+  var message = $('#chatInput').val();
+  socket.emit('chat:message', room, uid, message, chatName || 'unnamed');
+  $('#chatInput').val('');
+  return(false);//prevents page reload on submit
 }
-  //does chatName belong here?
-  var chatName = "";
-  $("#chatLabel").click(function() {chatToggleShow();} );
-  $('form').submit(sendChatMessage);
 
+//does chatName belong here?
+var chatName = '';
+$('#chatLabel').click(function() {chatToggleShow();});
+$('form').submit(sendChatMessage);
 
 // Periodically save drawing
-setInterval(function(){
+setInterval(function() {
   saveDrawing();
 }, 1000);
 
-function saveDrawing(){
+function saveDrawing() {
   var canvas = document.getElementById('myCanvas');
   // Save image to localStorage
-  localStorage.setItem("drawingPNG"+room, canvas.toDataURL('image/png'));
+  localStorage.setItem('drawingPNG' + room, canvas.toDataURL('image/png'));
 }
