@@ -271,7 +271,8 @@ function onMouseDown(event) {
     view.draw();
 
     // The data to be sent to Server in JSON
-	// Is used by the other Clients to draw(display) their own local path
+    // Is used by the other Clients to draw(display) their own local path
+    path_to_send = {  
       name: path.name,
       rgba: active_color_json,
       start: event.point,
@@ -296,7 +297,8 @@ function onMouseDown(event) {
   else if (activeTool == "rectangle" || activeTool == "circle") {
     var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server in JSON
-	// Is used by the other Clients to draw(display) the path
+    // Is used by the other Clients to draw(display) the path
+    path_to_send = {
       name: test_name,
       rgba: active_color_json,
       start: event.point,
@@ -346,10 +348,12 @@ function onMouseDrag(event) {
     });
 
     if (!timer_is_active) {
-	  // Send path updates every 100ms
+      // Send path updates every 100ms
+      send_paths_timer = setInterval(function() {
         socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
         path_to_send.path = new Array();
       }, 100);
+    }
     timer_is_active = true;
 
   } else if (activeTool == 'select') {
@@ -443,9 +447,9 @@ function onMouseUp(event) {
     }
     view.draw();
 
-	// add end point to path_to_send before sending to server
-	path_to_send.end = event.point;
-	// Send draw:end event to the Server with the end point
+    // add end point to path_to_send before sending to server
+    path_to_send.end = event.point;
+    // Send draw:end event to the Server with the end point
   }
 }
 
@@ -624,6 +628,8 @@ $('#exportSVG').on('click', function() {
 $('#exportPNG').on('click', function() {
   exportPNG();
 });
+
+$('#rectangleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ''
   }); // remove the backgrounds from other buttons
@@ -898,7 +904,7 @@ socket.on('image:add', function(artist, data, position, name) {
 var chatters = [];
 socket.on('chat:message', function(uid, message, name) {
   var isnew = true;
-  var achatter = []
+  var achatter = [];
   for (var i = 0; i < chatters.length; i++){
     if (uid === chatters[i][0]){
       isnew = false;
@@ -917,6 +923,7 @@ socket.on('chat:message', function(uid, message, name) {
   if(30 > Math.abs( ($("#chatMessages")[0].scrollTop+ $("#chatMessages").height()) - $("#chatMessages")[0].scrollHeight )) {
   //if the user is scrolled near the bottom, pull their scroll down with new text
     $("#chatMessages").scrollTop($("#chatMessages")[0].scrollHeight);
+  }
 });
 
 console.log(view);
@@ -949,12 +956,13 @@ var end_external_path = function(points, artist) {
     // Remove the old data
     external_paths[artist] = false;
 
-  }else if (points.tool == "rectangle" || points.tool == "circle") {
-	// Use start and end point to create a new shape
-	var start_point = new Point(points.start[1], points.start[2]);
-	var end_point = new Point(points.end[1], points.end[2]);
-    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-	external_paths[artist] = new Path.Rectangle(start_point, end_point);
+  } else if (points.tool == "rectangle" || points.tool == "circle") {
+    // Use start and end point to create a new shape
+    var start_point = new Point(points.start[1], points.start[2]),
+      end_point = new Point(points.end[1], points.end[2]),
+      color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+      
+    external_paths[artist] = new Path.Rectangle(start_point, end_point);
     path.fillColor = color;
     path.name = points.name;
     path.closed = true;
@@ -1056,8 +1064,8 @@ setInterval(function() {
   saveDrawing();
 }, 1000);
 
-function saveDrawing() {
+function saveDrawing(){
   var canvas = document.getElementById('myCanvas');
   // Save image to localStorage
-  localStorage.setItem('drawingPNG' + room, canvas.toDataURL('image/png'));
+  localStorage.setItem("drawingPNG"+room, canvas.toDataURL('image/png'));
 }
