@@ -292,8 +292,8 @@ function onMouseDown(event) {
       paper.project.activeLayer.selected = false;
     }
   }
-  // If it is a rectangle or circle then record the start point
-  else if (activeTool == "rectangle" || activeTool == "circle") {
+  // If it is a rectangle, circle, or line then record the start point
+  else if (activeTool == "rectangle" || activeTool == "circle" || activeTool == "line") {
     var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server in JSON
 	// Is used by the other Clients to draw(display) the path
@@ -441,12 +441,19 @@ function onMouseUp(event) {
     if ( activeTool == 'circle') {
       path.smooth();
     }
-    view.draw();
-
 	// add end point to path_to_send before sending to server
 	path_to_send.end = event.point;
 	// Send draw:end event to the Server with the end point
+  } else if (activeTool == 'line') {
+    path = new Path.Line(path_to_send.start, event.point);
+    path.fillColor = active_color_rgb;
+    path.name = path_to_send.name;
+    path.closed = true;
+    // add end point to path_to_send before sending to server
+    path_to_send.end = event.point;
+    // Send draw:end event to the Server with the end point
   }
+  view.draw();
 }
 
 var key_move_delta,
@@ -624,6 +631,7 @@ $('#exportSVG').on('click', function() {
 $('#exportPNG').on('click', function() {
   exportPNG();
 });
+$('#rectangleTool').on('click', function(){
   $('#editbar > ul > li > a').css({
     background: ''
   }); // remove the backgrounds from other buttons
@@ -646,6 +654,19 @@ $('#circleTool').on('click', function() {
   }); // set the selecttool css to show it as active
   
   activeTool = 'circle';
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+$('#lineTool').on('click', function(){
+  $('#editbar > ul > li > a').css({
+    background: ''
+  }); // remove the backgrounds from other buttons
+  
+  $('#lineTool > a').css({
+    background: '#eee'
+  }); // set the selecttool css to show it as active
+  
+  activeTool = 'line';
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
@@ -962,12 +983,19 @@ var end_external_path = function(points, artist) {
     if ( points.tool == 'circle') {
       path.smooth();
     }
-    
+  }else if (points.tool == "line") {
+	// Use start and end point to create a new shape
+	var start_point = new Point(points.start[1], points.start[2]);
+	var end_point = new Point(points.end[1], points.end[2]);
+    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+	external_paths[artist] = new Path.Line(start_point, end_point);
+    path.fillColor = color;
+    path.name = points.name;
+    path.closed = true;
+  }
     view.draw();
-
     // Remove the old data
     external_paths[artist] = false;
-  }
 };
 
 // Continues to draw a path NOT drawn locally by this client

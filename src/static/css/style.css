@@ -247,6 +247,9 @@ body {
 .buttonicon-circle {
   background-image: url('../../static/img/circle.png');
 }
+.buttonicon-line{
+  background-image: url('../../static/img/line.png');
+}
 .buttonicon-settings {
   background-position: 0px -436px
 }
