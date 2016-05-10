@@ -910,7 +910,7 @@ socket.on('image:add', function(artist, data, position, name) {
 var chatters = [];
 socket.on('chat:message', function(uid, message, name) {
   var isnew = true;
-  var achatter = []
+  var achatter = [];
   for (var i = 0; i < chatters.length; i++){
     if (uid === chatters[i][0]){
       isnew = false;
