@@ -260,6 +260,7 @@ function onMouseDown(event) {
 
   if (activeTool == "draw" || activeTool == "pencil") {
 	//The local path for this client
+    path = new Path();
     if (activeTool == 'draw') {
       path.fillColor = active_color_rgb;
     } else if (activeTool == 'pencil') {
