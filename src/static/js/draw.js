@@ -418,7 +418,7 @@ function onMouseUp(event) {
     path_to_send.end = event.point;
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
-	// Send the updated path to the Server
+    // Send the updated path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
 	// Send draw:end event to the Server with the end point
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
@@ -769,10 +769,9 @@ function encodeAsImgAndLink(svg) {
     var dummy = document.createElement('div');
     dummy.appendChild(svg);
 
-    var b64 = Base64.encode(dummy.innerHTML);
-
-    //window.winsvg = window.open("data:image/svg+xml;base64,\n"+b64);
-    var html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />"
+    var b64 = Base64.encode(newDiv.innerHTML),
+      html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />";
+    
     window.winsvg = window.open();
     window.winsvg.document.write(html);
     window.winsvg.document.body.style.margin = 0;
@@ -784,8 +783,9 @@ function encodeAsImgAndLink(svg) {
 // local filesystem. This skips making a round trip to the server
 // for a POST.
 function exportPNG() {
-  var canvas = document.getElementById('myCanvas');
-  var html = "<img src='" + canvas.toDataURL('image/png') + "' />"
+  var canvas = document.getElementById('myCanvas'),
+    html = "<img src='" + canvas.toDataURL('image/png') + "' />";
+  
   if ($.browser.msie) {
     window.winpng = window.open('/static/html/export.html');
     window.winpng.document.write(html);
@@ -1039,7 +1039,6 @@ progress_external_path = function(points, artist) {
 
     path.name = points.name;
     path.add(start_point);
-
   }
   
   // Draw all the points along the length of the path
