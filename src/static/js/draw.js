@@ -294,8 +294,8 @@ function onMouseDown(event) {
       paper.project.activeLayer.selected = false;
     }
   }
-  // If it is a rectangle or circle then record the start point
-else if (activeTool == "rectangle" || activeTool == "circle" || activeTool == "line") {
+  // If it is a rectangle, circle, or line then record the start point
+  else if (activeTool == "rectangle" || activeTool == "circle" || activeTool == "line") {
     var test_name = uid + ":" + (++paper_object_count);
     // The data to be sent to server in JSON
     // Is used by the other Clients to draw(display) the path
@@ -450,8 +450,7 @@ function onMouseUp(event) {
     if ( activeTool == 'circle') {
       path.smooth();
     }
-    view.draw();
-
+    
     // add end point to path_to_send before sending to server
     path_to_send.end = event.point;
     // Send draw:end event to the Server with the end point
