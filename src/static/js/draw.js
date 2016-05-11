@@ -325,8 +325,12 @@ function onMouseDrag(event) {
     return;
   }
 
-  if (activeTool == "draw" || activeTool == "pencil") {
-    var step = event.delta / 2;
+  if (activeTool == 'draw' || activeTool == 'pencil') {
+    var step = event.delta / 2,
+      top,
+      bottom,
+      item; 
+    
     step.angle += 90;
     if (activeTool == "draw") {
       var top = event.middlePoint + step;
@@ -335,7 +339,8 @@ function onMouseDrag(event) {
       var top = event.middlePoint;
       bottom = event.middlePoint;
     }
-	// Add data to local path
+	
+    // Add data to local path
     path.add(top);
     path.insert(0, bottom);
     path.smooth();
@@ -667,6 +672,21 @@ $('#lineTool').on('click', function(){
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
+$('#lineTool').on('click', function(){
+  $('#editbar > ul > li > a').css({
+    background: ''
+  }); // remove the backgrounds from other buttons
+  
+  $('#lineTool > a').css({
+    background: '#eee'
+  }); // set the selecttool css to show it as active
+  
+  activeTool = 'line';
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -978,16 +998,17 @@ var end_external_path = function(points, artist) {
     if ( points.tool == 'circle') {
       path.smooth();
     }
-  }else if (points.tool == "line") {
-	// Use start and end point to create a new shape
-	var start_point = new Point(points.start[1], points.start[2]);
-	var end_point = new Point(points.end[1], points.end[2]);
-    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-	external_paths[artist] = new Path.Line(start_point, end_point);
-    path.fillColor = color;
-    path.name = points.name;
-    path.closed = true;
-  }
+  } else if (points.tool == "line") {
+      // Use start and end point to create a new shape
+      var start_point = new Point(points.start[1], points.start[2]),
+      end_point = new Point(points.end[1], points.end[2]),
+      color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+      
+      external_paths[artist] = new Path.Line(start_point, end_point);
+      path.fillColor = color;
+      path.name = points.name;
+      path.closed = true;
+  }  
     view.draw();
     // Remove the old data
     external_paths[artist] = false;
@@ -1022,8 +1043,9 @@ progress_external_path = function(points, artist) {
   }
   
   // Draw all the points along the length of the path
-  var paths = points.path;
-  var length = paths.length;
+  var paths = points.path,
+    length = paths.length;
+    
   for (var i = 0; i < length; i++) {
 
     path.add(new Point(paths[i].top[1], paths[i].top[2]));
