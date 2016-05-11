@@ -325,8 +325,12 @@ function onMouseDrag(event) {
     return;
   }
 
-  if (activeTool == "draw" || activeTool == "pencil") {
-    var step = event.delta / 2;
+  if (activeTool == 'draw' || activeTool == 'pencil') {
+    var step = event.delta / 2,
+      top,
+      bottom,
+      item; 
+    
     step.angle += 90;
     if (activeTool == "draw") {
       var top = event.middlePoint + step;
@@ -335,7 +339,8 @@ function onMouseDrag(event) {
       var top = event.middlePoint;
       bottom = event.middlePoint;
     }
-	// Add data to local path
+	
+    // Add data to local path
     path.add(top);
     path.insert(0, bottom);
     path.smooth();
@@ -413,7 +418,7 @@ function onMouseUp(event) {
     path_to_send.end = event.point;
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
-	// Send the updated path to the Server
+    // Send the updated path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
 	// Send draw:end event to the Server with the end point
     socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
@@ -667,6 +672,7 @@ $('#lineTool').on('click', function(){
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -749,10 +755,9 @@ function encodeAsImgAndLink(svg) {
     var dummy = document.createElement('div');
     dummy.appendChild(svg);
 
-    var b64 = Base64.encode(dummy.innerHTML);
-
-    //window.winsvg = window.open("data:image/svg+xml;base64,\n"+b64);
-    var html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />"
+    var b64 = Base64.encode(newDiv.innerHTML),
+      html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />";
+    
     window.winsvg = window.open();
     window.winsvg.document.write(html);
     window.winsvg.document.body.style.margin = 0;
@@ -764,8 +769,9 @@ function encodeAsImgAndLink(svg) {
 // local filesystem. This skips making a round trip to the server
 // for a POST.
 function exportPNG() {
-  var canvas = document.getElementById('myCanvas');
-  var html = "<img src='" + canvas.toDataURL('image/png') + "' />"
+  var canvas = document.getElementById('myCanvas'),
+    html = "<img src='" + canvas.toDataURL('image/png') + "' />";
+  
   if ($.browser.msie) {
     window.winpng = window.open('/static/html/export.html');
     window.winpng.document.write(html);
@@ -910,7 +916,7 @@ socket.on('image:add', function(artist, data, position, name) {
 var chatters = [];
 socket.on('chat:message', function(uid, message, name) {
   var isnew = true;
-  var achatter = []
+  var achatter = [];
   for (var i = 0; i < chatters.length; i++){
     if (uid === chatters[i][0]){
       isnew = false;
@@ -978,16 +984,17 @@ var end_external_path = function(points, artist) {
     if ( points.tool == 'circle') {
       path.smooth();
     }
-  }else if (points.tool == "line") {
-	// Use start and end point to create a new shape
-	var start_point = new Point(points.start[1], points.start[2]);
-	var end_point = new Point(points.end[1], points.end[2]);
-    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-	external_paths[artist] = new Path.Line(start_point, end_point);
-    path.fillColor = color;
-    path.name = points.name;
-    path.closed = true;
-  }
+  } else if (points.tool == "line") {
+      // Use start and end point to create a new shape
+      var start_point = new Point(points.start[1], points.start[2]),
+      end_point = new Point(points.end[1], points.end[2]),
+      color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+      
+      external_paths[artist] = new Path.Line(start_point, end_point);
+      path.fillColor = color;
+      path.name = points.name;
+      path.closed = true;
+  }  
     view.draw();
     // Remove the old data
     external_paths[artist] = false;
@@ -1018,12 +1025,12 @@ progress_external_path = function(points, artist) {
 
     path.name = points.name;
     path.add(start_point);
-
   }
   
   // Draw all the points along the length of the path
-  var paths = points.path;
-  var length = paths.length;
+  var paths = points.path,
+    length = paths.length;
+    
   for (var i = 0; i < length; i++) {
 
     path.add(new Point(paths[i].top[1], paths[i].top[2]));
