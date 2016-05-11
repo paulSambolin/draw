@@ -70,7 +70,7 @@ function hexToRgb(hex) {
 $(document).ready(function() {
   var drawurl = window.location.href.split('?')[0]; // get the drawing url
   
-  $('#embedinput').val("<iframe name='embed_readwrite' src='' + drawurl + '?showControls=true&showChat=true&showLineNumbers=true&useMonospaceFont=false' width=600 height=400></iframe>"); // write it to the embed input
+  $('#embedinput').val("<iframe name='embed_readwrite' src='" + drawurl + "?showControls=true&showChat=true&showLineNumbers=true&useMonospaceFont=false' width=600 height=400></iframe>"); // write it to the embed input
   $('#linkinput').val(drawurl); // and the share/link input
   $('#drawTool > a').css({
     background: '#eee'
@@ -403,6 +403,7 @@ function onMouseUp(event) {
 
   if (activeTool == 'draw' || activeTool == 'pencil') {
     // Close this Client's path
+    path.add(event.point);
     path.closed = true;
     path.smooth();
     view.draw();
@@ -412,9 +413,11 @@ function onMouseUp(event) {
     
     // This covers the case where paths are created in less than 100 seconds
     // it does add a duplicate segment, but that is okay for now.
-	// Send the updated path to the Server
+    // Send the updated path to the Server
     socket.emit('draw:progress', room, uid, JSON.stringify(path_to_send));
-	// Send draw:end event to the Server with the end point
+    
+    // Send draw:end event to the Server with the end point
+    socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
 
     // Stop sending path updates to Server
     clearInterval(send_paths_timer);
@@ -776,7 +779,7 @@ function encodeAsImgAndLink(svg) {
     newDiv.appendChild(svg);
 
     var b64 = Base64.encode(newDiv.innerHTML),
-      html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64,' + b64 + '' />";
+      html = "<img style='height:100%;width:100%;' src='data:image/svg+xml;base64," + b64 + "' />";
     
     window.winsvg = window.open();
     window.winsvg.document.write(html);
@@ -789,7 +792,8 @@ function encodeAsImgAndLink(svg) {
 // local filesystem. This skips making a round trip to the server
 // for a POST.
 function exportPNG() {
-  var html = "<img src='' + canvas.toDataURL('image/png') + '' />";
+  var canvas = document.getElementById('myCanvas'),
+    html = "<img src='" + canvas.toDataURL('image/png') + "' />";
   
   if ($.browser.msie) {
     window.winpng = window.open('/static/html/export.html');
@@ -1036,9 +1040,9 @@ progress_external_path = function(points, artist) {
       path.strokeColor = color;
       path.strokeWidth = 2;
     }
-
+    
+    path.name = points.name;
     path.add(start_point);
-
   }
   
   // Draw all the points along the length of the path
