@@ -673,20 +673,6 @@ $('#lineTool').on('click', function(){
   paper.project.activeLayer.selected = false;
 });
 
-$('#lineTool').on('click', function(){
-  $('#editbar > ul > li > a').css({
-    background: ''
-  }); // remove the backgrounds from other buttons
-  
-  $('#lineTool > a').css({
-    background: '#eee'
-  }); // set the selecttool css to show it as active
-  
-  activeTool = 'line';
-  $('#myCanvas').css('cursor', 'pointer');
-  paper.project.activeLayer.selected = false;
-});
-
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
