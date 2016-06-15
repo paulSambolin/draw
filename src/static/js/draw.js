@@ -448,9 +448,9 @@ function onMouseUp(event) {
     if ( activeTool == 'circle') {
       path.smooth();
     }
-	// add end point to path_to_send before sending to server
-	path_to_send.end = event.point;
-	// Send draw:end event to the Server with the end point
+	  // add end point to path_to_send before sending to server
+	  path_to_send.end = event.point;
+	  // Send draw:end event to the Server with the end point
   } else if (activeTool == 'line') {
     path = new Path.Line(path_to_send.start, event.point);
     path.strokeColor = active_color_rgb;
@@ -986,6 +986,7 @@ var end_external_path = function(points, artist) {
 	  var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
 	  external_paths[artist] = new Path.Line(start_point, end_point);
+    path = external_paths[artist];
     path.strokeColor = color;
     path.name = points.name;
     path.closed = true;
