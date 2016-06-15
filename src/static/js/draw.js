@@ -461,6 +461,7 @@ function onMouseUp(event) {
     // Send draw:end event to the Server with the end point
   }
   view.draw();
+  socket.emit('draw:end', room, uid, JSON.stringify(path_to_send));
 }
 
 var key_move_delta;
@@ -643,30 +644,31 @@ $('#rectangleTool').on('click', function(){
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#circleTool').on('click', function() {
   $('#editbar > ul > li > a').css({
 	background: ""
-  }); // remove the backgrounds from other buttons
+  });
   $('#circleTool > a').css({
 	background: "#eee"
-  }); // set the selecttool css to show it as active
+  });
   activeTool = "circle";
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#lineTool').on('click', function(){
   $('#editbar > ul > li > a').css({
-    background: ''
-  }); // remove the backgrounds from other buttons
-  
+    background: ""
+  });
   $('#lineTool > a').css({
-    background: '#eee'
-  }); // set the selecttool css to show it as active
-  
-  activeTool = 'line';
+    background: "#eee"
+  });
+  activeTool = "line";
   $('#myCanvas').css('cursor', 'pointer');
   paper.project.activeLayer.selected = false;
 });
+
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -965,13 +967,13 @@ var end_external_path = function(points, artist) {
     external_paths[artist] = false;
 
   }else if (points.tool == "rectangle" || points.tool == "circle") {
-	// Use start and end point to create a new shape
-	var start_point = new Point(points.start[1], points.start[2]);
-	var end_point = new Point(points.end[1], points.end[2]);
+	  // Use start and end point to create a new shape
+	  var start_point = new Point(points.start[1], points.start[2]);
+	  var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-	external_paths[artist] = new Path.Rectangle(start_point, end_point);
+	  external_paths[artist] = new Path.Rectangle(start_point, end_point);
     path = external_paths[artist];
-	path.fillColor = color;
+	  path.fillColor = color;
     path.name = points.name;
     path.closed = true;
     
@@ -979,18 +981,19 @@ var end_external_path = function(points, artist) {
       path.smooth();
     }
   }else if (points.tool == "line") {
-	// Use start and end point to create a new shape
-	var start_point = new Point(points.start[1], points.start[2]);
-	var end_point = new Point(points.end[1], points.end[2]);
+	  // Use start and end point to create a new shape
+	  var start_point = new Point(points.start[1], points.start[2]);
+	  var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
-	external_paths[artist] = new Path.Line(start_point, end_point);
+	  external_paths[artist] = new Path.Line(start_point, end_point);
     path.fillColor = color;
     path.name = points.name;
     path.closed = true;
   }
-    view.draw();
-    // Remove the old data
-    external_paths[artist] = false;
+  
+  view.draw();
+  // Remove the old data
+  external_paths[artist] = false;
 };
 
 // Continues to draw a path NOT drawn locally by this client
