@@ -453,7 +453,7 @@ function onMouseUp(event) {
 	// Send draw:end event to the Server with the end point
   } else if (activeTool == 'line') {
     path = new Path.Line(path_to_send.start, event.point);
-    path.fillColor = active_color_rgb;
+    path.strokeColor = active_color_rgb;
     path.name = path_to_send.name;
     path.closed = true;
     // add end point to path_to_send before sending to server
@@ -986,11 +986,11 @@ var end_external_path = function(points, artist) {
 	  var end_point = new Point(points.end[1], points.end[2]);
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
 	  external_paths[artist] = new Path.Line(start_point, end_point);
-    path.fillColor = color;
+    path.strokeColor = color;
     path.name = points.name;
     path.closed = true;
   }
-  
+
   view.draw();
   // Remove the old data
   external_paths[artist] = false;

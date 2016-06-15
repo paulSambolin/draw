@@ -80,7 +80,7 @@ exports.endExternalPath = function (room, points, artist) {
 	  var color = new drawing.Color(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
 	  projects[room].external_paths[artist] = new drawing.Path.Line(start_point, end_point);
     path = projects[room].external_paths[artist];
-	  path.fillColor = color;
+	  path.strokeColor = color;
 	  path.name = points.name;
 	  path.closed = true;
     
