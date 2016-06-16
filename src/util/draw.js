@@ -49,7 +49,7 @@ exports.progressExternalPath = function (room, points, artist) {
 
 exports.fillColor = function (room, points, artist) {
     var project = projects[room].project;
-    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+    var color = new drawing.Color(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
     project.activeLayer._namedChildren[itemName][0].fillColor = color;
     project.view.draw();
     db.storeProject(room);
