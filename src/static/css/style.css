@@ -250,6 +250,9 @@ body {
 .buttonicon-line{
   background-image: url('../../static/img/line.png');
 }
+.buttonicon-fillColor{
+  background-image: url('../../static/img/fillColor.png');
+}
 .buttonicon-settings {
   background-position: 0px -436px
 }

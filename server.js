@@ -127,6 +127,20 @@ io.sockets.on('connection', function (socket) {
     draw.endExternalPath(room, JSON.parse(co_ordinates), uid);
   });
 
+
+  socket.on('draw:fillColor', function (room, uid, co_ordinates) {
+    if (!projects.projects[room] || !projects.projects[room].project) {
+      loadError(socket);
+      return;
+    }
+    io.in(room).emit('draw:fillColor', uid, co_ordinates);
+    /*
+    still need to implement fillColor for the database
+    draw.fillColor(room, JSON.parse(co_ordinates), uid);
+    */
+  });
+ 
+
   // User joins a room
   socket.on('subscribe', function(data) {
     subscribe(socket, data);

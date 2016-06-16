@@ -295,6 +295,32 @@ function onMouseDown(event) {
     } else {
       paper.project.activeLayer.selected = false;
     }
+  } else if (activeTool == "fillColor") {
+
+    // select the item
+    $("#myCanvas").css("cursor", "pointer");
+
+    //change the color of the object
+    event.item.fillColor = active_color_rgb;
+    view.draw();
+
+    //create a path with the item to change and the color to change it to
+    path_to_send = {
+      rgba: active_color_json,
+      item: event.item,
+      tool: activeTool
+    };
+
+    //emit the update fillColor event
+    socket.emit('draw:fillColor', room, uid, JSON.stringify(path_to_send));
+    path_to_send.path = new Array();
+
+
+
+    //catch the update fillColor event and update the correct item (if this client did not draw the item)
+
+    //
+
   }
   // If it is a rectangle, circle, or line then record the start point
   else if (activeTool == "rectangle" || activeTool == "circle" || activeTool == "line") {
@@ -669,6 +695,18 @@ $('#lineTool').on('click', function(){
   paper.project.activeLayer.selected = false;
 });
 
+$('#fillColorTool').on('click', function(){
+  $('#editbar > ul > li > a').css({
+    background: ""
+  });
+  $('#fillColorTool > a').css({
+    background: "#eee"
+  });
+  activeTool = "fillColor";
+  $('#myCanvas').css('cursor', 'pointer');
+  paper.project.activeLayer.selected = false;
+});
+
 $('#pencilTool').on('click', function() {
   $('#editbar > ul > li > a').css({
     background: ""
@@ -888,6 +926,16 @@ socket.on('item:remove', function(artist, name) {
   }
 });
 
+socket.on('draw:fillColor', function(artist, data) {
+  var points = JSON.parse(data);
+  //If this client wasn't the original artist draw(display) the path
+  if (artist != uid && paper.project.activeLayer._namedChildren[points.item.name][0]) {
+    var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
+    paper.project.activeLayer._namedChildren[points.item.name][0].fillColor = color;
+    view.draw();
+    }
+});
+
 socket.on('item:move', function(artist, itemNames, delta) {
   if (artist != uid) {
     for (x in itemNames) {
@@ -949,6 +997,7 @@ function update_user_count(count) {
 
 // Set of paths NOT drawn locally by this Client
 var external_paths = {};
+
 
 // Ends a path NOT drawn locally by this Client
 var end_external_path = function(points, artist) {
