@@ -134,10 +134,7 @@ io.sockets.on('connection', function (socket) {
       return;
     }
     io.in(room).emit('draw:fillColor', uid, co_ordinates);
-    /*
-    still need to implement fillColor for the database
     draw.fillColor(room, JSON.parse(co_ordinates), uid);
-    */
   });
  
 

@@ -921,7 +921,6 @@ socket.on('item:remove', function(artist, name) {
 
 socket.on('draw:fillColor', function(artist, data) {
   var points = JSON.parse(data);
-  console.log("Client received data"+points.name + ' ' +points.rgba.red)
   //If this client wasn't the original artist draw(display) the path
   if (artist != uid && paper.project.activeLayer._namedChildren[points.name][0]) {
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
