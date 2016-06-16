@@ -308,18 +308,11 @@ function onMouseDown(event) {
     path_to_send = {
       rgba: active_color_json,
       item: event.item,
-      tool: activeTool
     };
 
     //emit the update fillColor event
     socket.emit('draw:fillColor', room, uid, JSON.stringify(path_to_send));
     path_to_send.path = new Array();
-
-
-
-    //catch the update fillColor event and update the correct item (if this client did not draw the item)
-
-    //
 
   }
   // If it is a rectangle, circle, or line then record the start point
@@ -928,6 +921,7 @@ socket.on('item:remove', function(artist, name) {
 
 socket.on('draw:fillColor', function(artist, data) {
   var points = JSON.parse(data);
+  console.log("Client received data"+points.item.name + ' ' +points.rgba.red)
   //If this client wasn't the original artist draw(display) the path
   if (artist != uid && paper.project.activeLayer._namedChildren[points.item.name][0]) {
     var color = new RgbColor(points.rgba.red, points.rgba.green, points.rgba.blue, points.rgba.opacity);
